@@ -1,0 +1,266 @@
+import React from "react";
+import { StyleSheet, AppRegistry, Alert, View, Dimensions, AsyncStorage } from "react-native";
+import { Container, Header, Left, Body, Thumbnail, Title, Card, CardItem, Content, Right, Icon, Button, Text, Input, Form, Item, Label, Footer, FooterTab } from "native-base";
+import { StackNavigator } from "react-navigation";
+import DeviceInfo from 'react-native-device-info';
+import Loader from '../../indicator/loader';
+import firebase from "react-native-firebase";
+
+var {height, width} = Dimensions.get('window');
+var textFontSize = width * 0.02;
+
+var Token;
+
+export default class SignUp extends React.Component {
+	
+	constructor(props) {
+        super(props);
+ 
+        this.state = {
+			device : '',
+			company: '',
+			name: '',
+			email: '',
+			phone: '',
+			handphone: '',
+			username: '',
+            password: '',
+			uid: '',
+			confirmPassword: '',
+			errorMessage: null,
+			loading: false
+        };
+    }
+  
+	componentDidMount() {
+	   this.setState({device: DeviceInfo.getUniqueID()});
+	}
+
+	getRef() {
+		return firebase.database().ref();
+	}
+
+	async onRegisterPress() {
+		this.setState({ errorMessage: null, loading: true });
+		const { company, email, password, name } = this.state;
+		console.log(company);
+		console.log(email);
+		console.log(name);
+		console.log(password);
+
+		firebase
+		  .auth()
+		  .createUserAndRetrieveDataWithEmailAndPassword(email, password)
+		  .then(() => {
+			this.setState({ loading: false });
+		  })
+		  .catch(error => {
+			var errorCode = error.code;
+			var errorMessage = error.message;
+			this.setState({ errorMessage });
+		  });
+		  
+		await AsyncStorage.setItem("company", company);
+		await AsyncStorage.setItem("email", email);
+		await AsyncStorage.setItem("name", name);
+		await AsyncStorage.setItem("password", password);
+
+		firebase.auth().onAuthStateChanged(user => {
+		  if (user) {
+			console.log(user.uid, user.email);
+			this.getRef()
+			  .child("user")
+			  .push({
+				company: company,
+				email: email,
+				uid: user.uid,
+				name: this.state.name,
+				token: Token
+			  });			
+			this.setState({ uid: user.uid });
+			this.handleSubmit();
+		  }
+		});
+	}
+
+	  renderErrorMessage = () => {
+		if (this.state.errorMessage)
+		  return <Text style={styles.error}>{this.state.errorMessage}</Text>;
+	  };
+
+	handleSubmit = () => {
+		const { password, confirmPassword } = this.state;
+		// perform all neccassary validations
+		if (password !== confirmPassword) {
+			Alert.alert("Warning", "Password tidak sama");
+		} else {
+		this.setState({
+			loading: true
+		});
+			// make API call
+			fetch('http://103.247.10.156/~heiteknologi/api/User_Signup.php', {
+       method: 'POST',
+       headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+        // body : 
+        body: JSON.stringify({
+				deviceID: this.state.device,
+				company: this.state.company,
+				name: this.state.name,
+				username: this.state.username,
+				email: this.state.email,
+				phone: this.state.phone,
+				handphone: this.state.handphone,
+				password: this.state.password,
+				uid: this.state.uid,
+             })
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+                 if(responseJson === 'Success') {
+                      this.setState({ loading: false });
+					  this.props.navigation.navigate("Login")
+					  Alert.alert("Sukses", "Anda sudah mendaftar, silakan tunggu admin mengaktivasi");
+                        
+                    }else{
+                      this.setState({ loading: false });
+                      setTimeout(() => {
+                      Alert.alert('Gagal','Silakan coba lagi!');
+                      }, 100);
+                    
+                            }
+
+        }).done();
+		}
+	}
+	
+  render() {
+    return (
+      <Container>
+        <Content padder>
+            <Loader loading={this.state.loading} />
+            <View style={styles.center}>
+                  <Thumbnail square large source={require('../../assets/images/icon.png')} style={styles.images}/>
+            </View>
+			<Form style={styles.formPassword}>
+			<Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Company</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} onChangeText={(text) => this.setState({company:text})}/>
+            </Item>
+			<Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Name</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} onChangeText={(text) => this.setState({name:text})}/>
+            </Item>
+			<Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Email</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} onChangeText={(text) => this.setState({email:text})}/>
+            </Item>
+			<Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Phone</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} onChangeText={(text) => this.setState({phone:text})}/>
+            </Item>
+			<Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Mobile Phone</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} onChangeText={(text) => this.setState({handphone:text})}/>
+            </Item>
+            <Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Username</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} onChangeText={(text) => this.setState({username:text})}/>
+            </Item>
+            <Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Password</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} secureTextEntry={true} onChangeText={(text) => this.setState({password:text})}/>
+            </Item>
+            <Item floatingLabel>
+              <Label>
+                <Text style={styles.st_inputfnt}>Confirm Password</Text>
+              </Label>
+              <Input style={styles.st_inputfnt} secureTextEntry={true} onChangeText={(text) => this.setState({confirmPassword:text})}/>
+            </Item>
+          </Form>
+            <Button block info style={styles.footerBottom} onPress={this.handleSubmit}>
+              <Text>Sign Up</Text>
+          </Button>
+        </Content>
+      </Container>
+    );
+  }
+}
+SignUp.navigationOptions = ({ navigation }) => ({
+  header: (
+    <Header style={styles.header}>
+      <Left>
+        <Button transparent onPress={() => navigation.goBack(null)}>
+          <Icon name="ios-arrow-back" />
+        </Button>
+      </Left>
+      <Body>
+        <Title>User Sign Up</Title>
+      </Body>
+      <Right />
+    </Header>
+  )
+});
+
+const styles = StyleSheet.create({
+  
+  header:{
+	backgroundColor: '#0fa1d4',
+  },
+  button : {
+    backgroundColor: '#0fa1d4',
+  },
+  center:{
+      flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center', 
+  },
+  st_inputfnt:{
+      color: '#000',
+  },
+  images:{
+      marginTop: 80,
+      width: "30%",
+      aspectRatio: 1,
+      borderRadius: 20,
+  },
+  formLogin : {
+    paddingLeft : 10,
+    paddingRight : 30,
+  },
+  footerBottom:{
+    marginTop: 16,
+    paddingTop: 10,
+    marginLeft: 16,
+    marginRight: 16,
+	backgroundColor: '#0fa1d4',
+  },
+  footer: {
+    backgroundColor: '#0fa1d4',
+  },
+  footerText: {
+    fontSize: textFontSize,
+    color: '#fff',
+    fontWeight: '100',
+  },
+  iconFooter: {
+    color: '#fff',
+    fontSize: 28
+  }
+});

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "709162032105",
+    "firebase_url": "https://heindonesia-a0612.firebaseio.com",
+    "project_id": "heindonesia-a0612",
+    "storage_bucket": "heindonesia-a0612.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709162032105:android:a0ca3d6a56ce52bf",
+        "android_client_info": {
+          "package_name": "com.heindonesia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "709162032105-veo0skqn0hgmmk65j0honj3hf9mkeen4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh6Y9I6tnUUf_kVvsKIGXAFBqnTJThyVw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

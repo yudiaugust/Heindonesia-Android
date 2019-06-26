@@ -1,0 +1,37 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+		maven { url 'https://maven.google.com' }
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+		classpath 'com.google.gms:google-services:3.1.2'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+ext {
+    compileSdkVersion = 26
+    targetSdkVersion = 26
+    buildToolsVersion = "26.0.2"
+    supportLibVersion = "26.1.0"
+	oreoEXPERIMENTAL = "yes"
+	googlePlayServicesVersion = "11.8.0"
+	androidMapsUtilsVersion = "0.5+"
+}
+
+allprojects {
+    repositories {
+        mavenLocal()
+		maven { url 'https://maven.google.com' }
+        jcenter()
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
+        }
+    }
+}
